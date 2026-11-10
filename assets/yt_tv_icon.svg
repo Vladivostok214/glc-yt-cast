@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <filter id="shadow" x="-10%" y="-10%" width="125%" height="125%">
+      <feDropShadow dx="0" dy="16" stdDeviation="20" flood-color="#000000" flood-opacity="0.35"/>
+    </filter>
+    <linearGradient id="yt-grad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FF1E1E"/>
+      <stop offset="100%" stop-color="#CC0000"/>
+    </linearGradient>
+  </defs>
+
+  <!-- YouTube Red Badge with Shadow -->
+  <rect x="36" y="96" width="440" height="320" rx="88" ry="88" fill="url(#yt-grad)" filter="url(#shadow)"/>
+
+  <!-- High-contrast White Play Button -->
+  <polygon points="215,185 345,256 215,327" fill="#FFFFFF"/>
+</svg>

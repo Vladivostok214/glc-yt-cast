@@ -1,0 +1,11 @@
+[Desktop Entry]
+Name=YouTube TV Cast
+Comment=Búsqueda instantánea y control en YouTube para Android TV
+Exec=glc-yt-cast
+Icon=com.glc.ytcast
+Terminal=false
+Type=Application
+Categories=AudioVideo;Utility;Network;
+Keywords=youtube;tv;cast;search;remote;
+StartupNotify=true
+StartupWMClass=YouTube TV Search

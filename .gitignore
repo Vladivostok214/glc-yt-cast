@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+
+# Paquetes y compilación
+build/
+dist/
+*.egg-info/
+*.deb
+
+# Entornos y editores
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Logs y configuración local de pruebas
+*.log
+.config/
