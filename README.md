@@ -95,3 +95,13 @@ sudo apt install ./glc-yt-cast_1.0.0_all.deb
 ```bash
 sudo apt remove glc-yt-cast
 ```
+
+---
+
+## 6. Aviso Legal y Marcas Registradas
+
+Este proyecto es una herramienta independiente y de código abierto desarrollada con propósitos de interoperabilidad y uso personal. 
+
+- No está respaldado, patrocinado, afiliado ni asociado de ninguna forma con Google LLC, Alphabet Inc. o YouTube.
+- Las marcas registradas "YouTube", "Android", "Android TV" y sus logotipos correspondientes son propiedad exclusiva de Google LLC.
+- Todo el código original de esta aplicación se distribuye bajo los términos de la Licencia MIT.
