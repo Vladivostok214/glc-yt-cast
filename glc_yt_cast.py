@@ -21,6 +21,7 @@ import time
 import queue
 import json
 import socket
+import shutil
 import subprocess
 import threading
 import urllib.parse
@@ -223,19 +224,67 @@ switch.uiverse-switch slider {
 }
 """
 
+def get_adb_binary():
+    """Busca el binario de adb en variables de entorno, embebido en AppImage o en el sistema."""
+    env_adb = os.environ.get("ADB_PATH")
+    if env_adb and os.path.isfile(env_adb) and os.access(env_adb, os.X_OK):
+        return env_adb
+
+    appdir = os.environ.get("APPDIR")
+    search_paths = []
+    if appdir:
+        search_paths.extend([
+            Path(appdir) / "usr" / "bin" / "adb",
+            Path(appdir) / "bin" / "adb",
+        ])
+    search_paths.extend([
+        BASE_DIR / "bin" / "adb",
+        BASE_DIR / "adb",
+    ])
+    for p in search_paths:
+        if p.is_file() and os.access(p, os.X_OK):
+            return str(p)
+
+    system_adb = shutil.which("adb")
+    if system_adb:
+        return system_adb
+
+    return "adb"
+
+
+def get_local_subnet_prefix():
+    """Detecta el prefijo de la subred local activa (ej. '192.168.1' o '192.168.0')."""
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(("8.8.8.8", 80))
+        local_ip = s.getsockname()[0]
+        s.close()
+        parts = local_ip.split(".")
+        if len(parts) == 4 and parts[0] != "127":
+            return ".".join(parts[:3])
+    except Exception:
+        pass
+    return "192.168.1"
+
+
 def load_saved_ip():
     try:
         if CONFIG_FILE.exists():
             data = json.loads(CONFIG_FILE.read_text(encoding="utf-8"))
-            return data.get("last_ip", "192.168.1.167")
+            ip = data.get("last_ip")
+            if ip and isinstance(ip, str) and ip.strip():
+                return ip.strip()
     except Exception:
         pass
-    return "192.168.1.167"
+    return None
+
 
 def save_ip(ip):
     try:
+        if not ip:
+            return
         CONFIG_DIR.mkdir(parents=True, exist_ok=True)
-        CONFIG_FILE.write_text(json.dumps({"last_ip": ip}), encoding="utf-8")
+        CONFIG_FILE.write_text(json.dumps({"last_ip": ip.strip()}), encoding="utf-8")
     except Exception:
         pass
 
@@ -288,7 +337,7 @@ class ADBCommandQueue:
         self.reset_shell()
         try:
             self.shell_proc = subprocess.Popen(
-                ["adb", "-s", f"{ip}:5555", "shell"],
+                [get_adb_binary(), "-s", f"{ip}:5555", "shell"],
                 stdin=subprocess.PIPE,
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL,
@@ -349,16 +398,19 @@ class YouTubeCaster:
         self.connected = False
         self.cmd_queue = ADBCommandQueue(lambda: self.ip)
 
-    def connect(self, callback_success, callback_failure):
+    def connect(self, callback_success, callback_failure, force_ip=None):
+        if force_ip:
+            self.ip = force_ip.strip()
+
         def _task():
-            # 1. Probar primero la última IP guardada
-            if self._try_connect(self.ip):
+            # 1. Probar primero si hay una IP válida guardada o especificada
+            if self.ip and self._try_connect(self.ip):
                 save_ip(self.ip)
                 self.connected = True
                 GLib.idle_add(callback_success, self.ip)
                 return
 
-            # 2. Si no responde, escanear la red local en paralelo con as_completed
+            # 2. Si no responde o no hay IP guardada, escanear la red local dinámicamente
             found_ip = self._scan_network()
             if found_ip and self._try_connect(found_ip):
                 self.ip = found_ip
@@ -376,7 +428,7 @@ class YouTubeCaster:
             return False
         try:
             res = subprocess.run(
-                ["adb", "connect", f"{ip}:5555"],
+                [get_adb_binary(), "connect", f"{ip}:5555"],
                 capture_output=True, text=True, timeout=2.5
             )
             out = res.stdout.lower()
@@ -386,10 +438,11 @@ class YouTubeCaster:
         return False
 
     def _scan_network(self):
+        prefix = get_local_subnet_prefix()
         def check(ip):
             try:
                 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                s.settimeout(0.7)
+                s.settimeout(0.6)
                 r = s.connect_ex((ip, 5555))
                 s.close()
                 if r == 0:
@@ -398,8 +451,12 @@ class YouTubeCaster:
                 pass
             return None
 
-        ips = [f"192.168.1.{i}" for i in range(100, 220)]
-        with concurrent.futures.ThreadPoolExecutor(max_workers=40) as executor:
+        # Priorizar rango común de DHCP primero (100 a 220), luego el resto de la subred
+        ips = [f"{prefix}.{i}" for i in range(100, 221)] + \
+              [f"{prefix}.{i}" for i in range(2, 100)] + \
+              [f"{prefix}.{i}" for i in range(221, 255)]
+
+        with concurrent.futures.ThreadPoolExecutor(max_workers=50) as executor:
             futures = [executor.submit(check, ip) for ip in ips]
             for f in concurrent.futures.as_completed(futures):
                 res = f.result()
@@ -421,7 +478,7 @@ class YouTubeCaster:
 
         def _send():
             subprocess.run(
-                ["adb", "-s", f"{self.ip}:5555", "shell", "am", "start", "-a", "android.intent.action.VIEW", "-d", target_url],
+                [get_adb_binary(), "-s", f"{self.ip}:5555", "shell", "am", "start", "-a", "android.intent.action.VIEW", "-d", target_url],
                 capture_output=True, timeout=3
             )
 
@@ -435,7 +492,7 @@ class YouTubeCaster:
         self.connected = False
         self.cmd_queue.reset_shell()
         try:
-            subprocess.run(["adb", "disconnect"], capture_output=True, timeout=2)
+            subprocess.run([get_adb_binary(), "disconnect"], capture_output=True, timeout=2)
         except Exception:
             pass
 
@@ -476,9 +533,9 @@ class FloatingSearchWindow(Gtk.Window):
         monitor = display.get_primary_monitor() or display.get_monitor(0)
         geom = monitor.get_geometry()
         win_w = 380
-        # Posición anclada a la esquina superior derecha, justo bajo el panel de Ubuntu
-        x = geom.x + geom.width - win_w - 18
-        y = geom.y + 36
+        # Posición anclada a la esquina superior derecha, asegurando márgenes válidos
+        x = max(10, geom.x + geom.width - win_w - 18)
+        y = max(10, geom.y + 36)
         self.move(x, y)
 
     def setup_ui(self):
@@ -527,6 +584,15 @@ class FloatingSearchWindow(Gtk.Window):
         self.switch.set_tooltip_text("Conectar / Desconectar YouTube TV")
         self.switch.connect("notify::active", self.on_switch_toggled)
         header.pack_start(self.switch, False, False, 0)
+
+        # Botón sutil de configuración de IP (Engranaje)
+        btn_settings = Gtk.Button()
+        btn_settings.set_image(Gtk.Image.new_from_icon_name("emblem-system-symbolic", Gtk.IconSize.BUTTON))
+        btn_settings.get_style_context().add_class("header-close-btn")
+        btn_settings.set_tooltip_text("Configurar IP de la TV")
+        btn_settings.set_can_focus(False)
+        btn_settings.connect("clicked", lambda _: self.show_config_ip_dialog())
+        header.pack_start(btn_settings, False, False, 0)
 
         # Botón sutil de cerrar / ocultar ventana
         btn_close = Gtk.Button()
@@ -651,6 +717,49 @@ class FloatingSearchWindow(Gtk.Window):
         self.on_quit_request()
         return False
 
+    def show_config_ip_dialog(self):
+        dialog = Gtk.Dialog(
+            title="Configurar IP de la TV",
+            transient_for=self,
+            flags=Gtk.DialogFlags.MODAL | Gtk.DialogFlags.DESTROY_WITH_PARENT
+        )
+        dialog.add_buttons(
+            "Cancelar", Gtk.ResponseType.CANCEL,
+            "Guardar y Conectar", Gtk.ResponseType.OK
+        )
+        dialog.set_default_size(320, 130)
+        dialog.set_position(Gtk.WindowPosition.CENTER_ON_PARENT)
+
+        box = dialog.get_content_area()
+        box.set_spacing(10)
+        box.set_border_width(12)
+
+        lbl = Gtk.Label(label="Dirección IP de Android TV en tu red local:")
+        lbl.set_xalign(0)
+        box.pack_start(lbl, False, False, 0)
+
+        entry = Gtk.Entry()
+        entry.set_placeholder_text("Ej: 192.168.1.150")
+        if self.caster.ip:
+            entry.set_text(self.caster.ip)
+        entry.set_activates_default(True)
+        box.pack_start(entry, False, False, 0)
+
+        dialog.set_default_response(Gtk.ResponseType.OK)
+        dialog.show_all()
+
+        response = dialog.run()
+        if response == Gtk.ResponseType.OK:
+            new_ip = entry.get_text().strip()
+            if new_ip:
+                self.caster.ip = new_ip
+                save_ip(new_ip)
+                self.lbl_status.set_text(f"Conectando a {new_ip}...")
+                self.lbl_status.get_style_context().remove_class("status-online")
+                self.lbl_status.get_style_context().add_class("status-connecting")
+                self.caster.connect(self.on_connected_success, self.on_connected_failed, force_ip=new_ip)
+        dialog.destroy()
+
     def on_switch_toggled(self, switch, gparam):
         if self.is_internal_toggle:
             return
@@ -662,7 +771,7 @@ class FloatingSearchWindow(Gtk.Window):
                 self.lbl_status.get_style_context().add_class("status-connecting")
                 self.caster.connect(self.on_connected_success, self.on_connected_failed)
             else:
-                self.on_connected_success(self.caster.target_ip)
+                self.on_connected_success(self.caster.ip)
         else:
             self.caster.disconnect()
             self.lbl_status.set_text("Desconectado")
@@ -690,7 +799,7 @@ class FloatingSearchWindow(Gtk.Window):
         self.switch.set_active(False)
         self.is_internal_toggle = False
 
-        self.lbl_status.set_text("Error de conexión")
+        self.lbl_status.set_text("Sin conexión (⚙️)")
         self.lbl_status.get_style_context().remove_class("status-connecting")
         self.lbl_status.get_style_context().remove_class("status-online")
         self.body_revealer.set_reveal_child(False)
@@ -810,6 +919,10 @@ class TrayApp:
         item_search = Gtk.MenuItem(label="🔍 Buscar en YouTube TV")
         item_search.connect("activate", lambda _: self.window.show_window())
         menu.append(item_search)
+
+        item_config = Gtk.MenuItem(label="⚙️ Configurar IP de la TV...")
+        item_config.connect("activate", lambda _: self.window.show_config_ip_dialog())
+        menu.append(item_config)
 
         menu.append(Gtk.SeparatorMenuItem())
 
