@@ -5,7 +5,7 @@ set -e
 # Script de construcción de paquete Debian para glc-yt-cast
 # ========================================================
 
-VERSION="1.0.0"
+VERSION="1.1.0"
 PKG_NAME="glc-yt-cast"
 ARCH="all"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

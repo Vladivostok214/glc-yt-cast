@@ -8,7 +8,7 @@ set -euo pipefail
 # Compatible con SteamOS (Steam Deck), Arch Linux, Fedora, Ubuntu 22.04+, etc.
 # ========================================================
 
-VERSION="1.0.0"
+VERSION="1.1.0"
 APP_NAME="glc-yt-cast"
 OUTPUT_NAME="${1:-glc-yt-steamdesk}"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

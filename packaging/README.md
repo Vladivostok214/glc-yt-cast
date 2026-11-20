@@ -1,47 +1,49 @@
 # Guía de Empaquetado y Compatibilidad Multiplataforma
 
-Este directorio centraliza las herramientas para compilar y probar **GLC YouTube TV Cast** en diferentes distribuciones de Linux (incluyendo Steam Deck / SteamOS).
+Este directorio centraliza las herramientas para compilar y probar **GLC YouTube TV Cast (v1.1.0)** en distintas distribuciones de Linux, manteniendo un único código fuente (`glc_yt_cast.py`).
 
 ---
 
 ## 📦 Formatos Disponibles
 
-### 1. AppImage (Recomendado para Steam Deck y otras distros)
-* **Directorio:** `packaging/appimage/`
-* **Script:** `./packaging/appimage/build_appimage.sh`
-* **Características:**
-  * Incluye el binario oficial de `adb` (Google platform-tools) embebido dentro del paquete.
-  * No requiere permisos de administrador ni modifica el sistema raíz (ideal para el sistema de solo lectura de SteamOS).
-  * Genera el archivo: `GLC-YouTube-TV-Cast-1.0.0-x86_64.AppImage`.
-* **Cómo usar en Steam Deck:**
-  1. Copiar el archivo `.AppImage` a la Steam Deck (en Modo Escritorio).
-  2. Clic derecho -> *Propiedades* -> *Permisos* -> Marcar *Es ejecutable* (o `chmod +x`).
-  3. Doble clic para ejecutar.
-
-### 2. Debian (.deb para Ubuntu / Debian / Linux Mint)
+### 1. Debian / Ubuntu (`.deb` nativo)
 * **Directorio:** `packaging/deb/`
-* **Script:** `./packaging/deb/build_deb.sh` (o el alias `./build_deb.sh` en la raíz).
+* **Compilación:** `./build_deb.sh` (o `./packaging/deb/build_deb.sh`)
+* **Archivo generado:** `glc-yt-cast_1.1.0_all.deb` (~34 KB)
+* **Instalación (resuelve e instala dependencias automáticamente):**
+  ```bash
+  sudo apt install ./glc-yt-cast_1.1.0_all.deb
+  ```
+
+### 2. Steam Deck / Linux Universal (`.AppImage` 100% autocontenida)
+* **Directorio:** `packaging/appimage/`
+* **Compilación:** `./packaging/appimage/build_appimage.sh` (requiere `podman` o `docker`)
+* **Archivo generado:** `glc-yt-steamdesk.AppImage` (~45 MB)
 * **Características:**
-  * Paquete nativo de Debian con dependencias del sistema (`dpkg`).
-  * Genera el archivo: `glc-yt-cast_1.0.0_all.deb`.
+  * Compilada en un contenedor limpio de **Ubuntu 22.04 (GLIBC 2.35)** para máxima compatibilidad con SteamOS, Arch Linux, Fedora, Debian 12+ y Ubuntu 22.04+.
+  * Incluye todo embebido: **Python 3.10, GTK 3, PyGObject, AyatanaAppIndicator3, loaders PNG/SVG, iconos Adwaita, base MIME y `adb` oficial de Google**.
+  * No requiere permisos de administrador ni modificar el sistema raíz inmutable de SteamOS.
+* **Instalación recomendada en Steam Deck (Modo Escritorio):**
+  * **Opción recomendada (con icono en el menú):** Instalar **Gear Lever** desde la tienda Discover, arrastrar `glc-yt-steamdesk.AppImage` y pulsar *"Move to the app menu"*.
+  * **Opción directa:** Clic derecho → *Propiedades* → *Permisos* → marcar *"Es ejecutable"* y abrir con doble clic.
 
 ---
 
-## 🧪 Pruebas Rápidas con Distrobox
+## 🧪 Pruebas Aisladas con Distrobox
 
-Si deseas verificar el funcionamiento de la AppImage en otras distribuciones (como Arch Linux o Fedora) sin crear máquinas virtuales pesadas:
+Para verificar que la AppImage funciona sin dependencias externas en contenedores completamente limpios de Arch Linux o Fedora:
 
-1. **Instalar Distrobox y Podman:**
+1. **Instalar Podman y Distrobox (solo la primera vez):**
    ```bash
    ./packaging/tests-distrobox/setup_distrobox.sh
    ```
 
-2. **Probar en Arch Linux (Entorno base de SteamOS):**
+2. **Probar en Arch Linux limpio (entorno base de SteamOS):**
    ```bash
    ./packaging/tests-distrobox/test_arch.sh
    ```
 
-3. **Probar en Fedora (Entorno base de Bazzite):**
+3. **Probar en Fedora limpio:**
    ```bash
    ./packaging/tests-distrobox/test_fedora.sh
    ```

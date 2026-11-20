@@ -8,7 +8,7 @@ set -e
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 CONTAINER_NAME="glc-test-fedora"
-APPIMAGE="${PROJECT_DIR}/GLC-YouTube-TV-Cast-1.0.0-x86_64.AppImage"
+APPIMAGE="${PROJECT_DIR}/glc-yt-steamdesk.AppImage"
 
 if [ ! -f "${APPIMAGE}" ]; then
     echo "==> AppImage no encontrada. Compilando primero..."
