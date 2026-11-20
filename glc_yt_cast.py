@@ -314,7 +314,7 @@ class ADBCommandQueue:
         self.cmd_queue = queue.Queue()
         self.shell_proc = None
         self.current_ip = None
-        self.use_sendevent = False
+        self.input_event_dev = None
         self.last_send_time = 0.0
         self.min_interval = 0.035
         self.running = True
@@ -338,21 +338,27 @@ class ADBCommandQueue:
                 pass
             self.shell_proc = None
         self.current_ip = None
-        self.use_sendevent = False
+        self.input_event_dev = None
 
-    def _detect_sendevent_support(self, ip):
-        """Comprueba si /dev/input/event3 es escribible y soporta KEY_UP (0x0067 = 103)."""
+    def _detect_input_event_device(self, ip):
+        """Busca automáticamente cualquier /dev/input/event* escribible que soporte KEY_UP (0x0067)."""
         try:
-            res = subprocess.run(
-                [
-                    get_adb_binary(), "-s", f"{ip}:5555", "shell",
-                    "test -w /dev/input/event3 && getevent -p /dev/input/event3 2>/dev/null | grep -q '0067'"
-                ],
-                capture_output=True, timeout=1.5
+            probe_cmd = (
+                'for d in /dev/input/event*; do '
+                'if [ -w "$d" ] && getevent -p "$d" 2>/dev/null | grep -q "0067"; then '
+                'echo "$d"; break; '
+                'fi; done'
             )
-            return res.returncode == 0
+            res = subprocess.run(
+                [get_adb_binary(), "-s", f"{ip}:5555", "shell", probe_cmd],
+                capture_output=True, text=True, timeout=2.0
+            )
+            dev = res.stdout.strip().splitlines()[0].strip() if res.stdout.strip() else ""
+            if dev.startswith("/dev/input/event"):
+                return dev
         except Exception:
-            return False
+            pass
+        return None
 
     def _get_shell(self, ip):
         if self.shell_proc is not None and self.current_ip == ip:
@@ -360,7 +366,7 @@ class ADBCommandQueue:
                 return self.shell_proc
         self.reset_shell()
         try:
-            self.use_sendevent = self._detect_sendevent_support(ip)
+            self.input_event_dev = self._detect_input_event_device(ip)
             self.shell_proc = subprocess.Popen(
                 [get_adb_binary(), "-s", f"{ip}:5555", "shell"],
                 stdin=subprocess.PIPE,
@@ -394,12 +400,13 @@ class ADBCommandQueue:
                 if item[0] == 'key' and shell:
                     keycode = item[1]
                     linux_code = LINUX_KEY_MAP.get(keycode)
-                    if self.use_sendevent and linux_code:
+                    if self.input_event_dev and linux_code:
+                        dev = self.input_event_dev
                         cmd = (
-                            f"sendevent /dev/input/event3 1 {linux_code} 1\n"
-                            f"sendevent /dev/input/event3 0 0 0\n"
-                            f"sendevent /dev/input/event3 1 {linux_code} 0\n"
-                            f"sendevent /dev/input/event3 0 0 0\n"
+                            f"sendevent {dev} 1 {linux_code} 1\n"
+                            f"sendevent {dev} 0 0 0\n"
+                            f"sendevent {dev} 1 {linux_code} 0\n"
+                            f"sendevent {dev} 0 0 0\n"
                         )
                         if keycode in (23, 66):
                             cmd += "input keyevent 23\n"

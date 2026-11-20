@@ -10,11 +10,12 @@ set -euo pipefail
 
 VERSION="1.0.0"
 APP_NAME="glc-yt-cast"
+OUTPUT_NAME="${1:-glc-yt-steamdesk}"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 BUILD_DIR="/tmp/${APP_NAME}-appimage-build"
 APP_DIR="${BUILD_DIR}/AppDir"
-OUTPUT_APPIMAGE="${PROJECT_DIR}/GLC-YouTube-TV-Cast-${VERSION}-x86_64.AppImage"
+OUTPUT_APPIMAGE="${PROJECT_DIR}/${OUTPUT_NAME}.AppImage"
 CACHE_DIR="${SCRIPT_DIR}/.cache"
 
 mkdir -p "${CACHE_DIR}"
