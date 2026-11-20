@@ -16,6 +16,9 @@ dist/
 *.AppImage
 .cache/
 packaging/*/.cache/
+windows/src-tauri/target/
+windows/src-tauri/bin/
+windows/src-tauri/gen/
 
 # Entornos y editores
 .vscode/

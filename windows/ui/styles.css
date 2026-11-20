@@ -1,0 +1,306 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  overflow: hidden;
+  font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.window-shell {
+  padding: 10px;
+  width: 100%;
+}
+
+.popover-card {
+  background-color: #181822;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 20px;
+  padding: 10px 14px;
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.52);
+  display: flex;
+  flex-direction: column;
+}
+
+/* CABECERA */
+.header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 36px;
+}
+
+.app-icon {
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+
+.title-box {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.25;
+}
+
+.app-title {
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.status-label {
+  color: #8b8ba7;
+  font-size: 11px;
+  transition: color 180ms ease;
+}
+
+.status-online {
+  color: #3fb950;
+  font-weight: 600;
+}
+
+.status-connecting {
+  color: #38bdf8;
+  font-weight: 600;
+}
+
+.spacer {
+  flex: 1;
+}
+
+.header-btn {
+  border: none;
+  background: transparent;
+  color: #7b7b90;
+  width: 26px;
+  height: 26px;
+  border-radius: 13px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 150ms ease;
+}
+
+.header-btn:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
+/* TOGGLE UIVERSE */
+.uiverse-switch {
+  position: relative;
+  display: inline-block;
+  width: 46px;
+  height: 24px;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.uiverse-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.uiverse-switch .slider {
+  position: absolute;
+  inset: 0;
+  background-color: #141418;
+  border: 2px solid #414141;
+  border-radius: 50px;
+  transition: all 260ms ease;
+}
+
+.uiverse-switch .slider::before {
+  content: "";
+  position: absolute;
+  height: 16px;
+  width: 16px;
+  left: 2px;
+  top: 2px;
+  background-color: #ffffff;
+  border-radius: 50%;
+  transition: transform 260ms ease;
+}
+
+.uiverse-switch input:checked + .slider {
+  background-color: #0974f1;
+  border-color: #0974f1;
+  box-shadow: 0 0 16px rgba(9, 117, 241, 0.85);
+}
+
+.uiverse-switch input:checked + .slider::before {
+  transform: translateX(22px);
+}
+
+/* COLAPSABLES SUAVES */
+.collapsible {
+  display: none;
+  margin-top: 8px;
+}
+
+.collapsible.open {
+  display: block;
+}
+
+/* PANEL CONFIG IP */
+.ip-box {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background-color: #22222c;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 14px;
+  padding: 4px 6px 4px 10px;
+}
+
+.ip-box:focus-within {
+  border-color: #0974f1;
+}
+
+.ip-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #ffffff;
+  font-size: 12.5px;
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+.ip-input::placeholder {
+  color: #7b7b90;
+}
+
+.ip-save-btn {
+  border: none;
+  background-color: #0974f1;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 5px 11px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background-color 150ms ease;
+}
+
+.ip-save-btn:hover {
+  background-color: #1f83ff;
+}
+
+/* BARRA DE BÚSQUEDA CÁPSULA */
+.body-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.search-form {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background-color: #22222c;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 22px;
+  padding: 4px 10px;
+  transition: all 200ms ease;
+}
+
+.search-form:focus-within {
+  border-color: #0974f1;
+  box-shadow: 0 0 12px rgba(9, 117, 241, 0.35);
+}
+
+.icon-btn {
+  border: none;
+  background: transparent;
+  color: #8b8ba7;
+  width: 26px;
+  height: 26px;
+  border-radius: 13px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: color 160ms ease;
+}
+
+.icon-btn:hover {
+  color: #ffffff;
+}
+
+.icon-btn.hidden {
+  display: none;
+}
+
+.search-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #ffffff;
+  font-size: 13.5px;
+  padding: 4px 2px;
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+.search-input::placeholder {
+  color: #7b7b90;
+}
+
+/* BARRA HORIZONTAL D-PAD */
+.nav-capsule {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background-color: #22222c;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 18px;
+  padding: 4px 8px;
+  width: fit-content;
+  margin: 0 auto;
+}
+
+.nav-btn {
+  border: none;
+  background: transparent;
+  color: #a5a5b5;
+  width: 36px;
+  height: 30px;
+  border-radius: 15px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 140ms ease;
+}
+
+.nav-btn:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
+.nav-btn:active {
+  background-color: rgba(255, 255, 255, 0.22);
+}
+
+.nav-btn-play {
+  color: #0974f1;
+}
+
+.nav-btn-play:hover {
+  background-color: rgba(9, 117, 241, 0.22);
+  color: #38bdf8;
+}
