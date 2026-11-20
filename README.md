@@ -22,7 +22,7 @@ Lanzador rápido, minimalista y de alto rendimiento para búsqueda y control de 
 
 Para que la aplicación interactúe con el televisor o deco:
 
-1. **Dispositivo con Android:** Smart TV, TV Box o deco certificado con Android TV / Google TV (probado en Smart TVs y decos como **SEI Robotics SEI500W**).
+1. **Dispositivo con Android:** Smart TV, TV Box o deco certificado con Android TV / Google TV. Consulta la lista de dispositivos probados y aprobados en [COMPATIBILITY.md](COMPATIBILITY.md).
 2. **Red Local Común:** La computadora / Steam Deck y el dispositivo Android TV deben compartir la misma red local (Wi-Fi o Ethernet).
 3. **Depuración ADB Habilitada:**
    - En el televisor/deco, ingresar a *Ajustes* → *Preferencias del dispositivo* → *Información* (o *Acerca de*) y pulsar **7 veces** consecutivas sobre *Compilación* para desbloquear las *Opciones de desarrollador*.
@@ -74,6 +74,7 @@ glc-yt-cast/
 │   └── tests-distrobox/            # Scripts de prueba aislada en Arch Linux y Fedora
 ├── LICENSE                         # Licencia de código abierto MIT
 ├── .gitignore                      # Reglas de exclusión Git
+├── COMPATIBILITY.md                # Matriz de dispositivos probados y aprobados
 └── README.md                       # Documentación técnica del proyecto
 ```
 
