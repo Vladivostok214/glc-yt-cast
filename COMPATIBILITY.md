@@ -11,6 +11,7 @@ Registro de dispositivos cliente (donde se ejecuta la aplicación) y dispositivo
 | **Ubuntu 26.04 LTS** | GNOME (Xwayland) | `.deb` (`v1.1.0`) | ✅ Aprobado | Instalación nativa vía `sudo apt install` con resolución automática de dependencias. |
 | **Steam Deck (SteamOS 3)** | KDE Plasma (Modo Escritorio) | `.AppImage` (`glc-yt-steamdesk.AppImage`) | ✅ Aprobado | 100% autocontenida (sin instalar dependencias ni modificar el sistema raíz). Se recomienda **Gear Lever** (Discover) para integrar el icono al menú. |
 | **Arch Linux (limpio)** | X11 / Xwayland | `.AppImage` | ✅ Aprobado | Verificado en contenedor limpio sin Python, GTK, PyGObject ni ADB preinstalados (Distrobox). |
+| **Windows 11 (x64)** | WebView2 / Tray Nativo | Portable `.zip` (5,7 MB) e Instalador NSIS `.exe` (4,4 MB) | ✅ Aprobado | Compilado en Rust + Tauri v2 con `adb.exe` embebido, atajo global `Ctrl + Alt + Y`, icono en bandeja y cierre limpio. |
 
 ---
 

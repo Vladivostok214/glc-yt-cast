@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>YouTube TV</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="window-shell">
+    <div id="popover-card" class="popover-card">
+      <!-- CABECERA -->
+      <div class="header" data-tauri-drag-region>
+        <img src="icon.png" alt="YouTube TV" class="app-icon" draggable="false" />
+        <div class="title-box" data-tauri-drag-region>
+          <span class="app-title">YouTube TV</span>
+          <span id="status-label" class="status-label">Desconectado</span>
+        </div>
+
+        <div class="spacer" data-tauri-drag-region></div>
+
+        <!-- Toggle Switch estilo Uiverse -->
+        <label class="uiverse-switch" title="Conectar / Desconectar YouTube TV">
+          <input id="connect-toggle" type="checkbox" />
+          <span class="slider"></span>
+        </label>
+
+        <!-- Botón de configuración de IP -->
+        <button id="btn-settings" class="header-btn" title="Configurar IP de la TV" aria-label="Configurar IP">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+        </button>
+
+        <!-- Botón ocultar ventana -->
+        <button id="btn-close" class="header-btn" title="Ocultar (Esc)" aria-label="Ocultar">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+      <!-- PANEL INLINE DE CONFIGURACIÓN DE IP -->
+      <div id="ip-panel" class="collapsible">
+        <div class="ip-box">
+          <input id="ip-input" type="text" class="ip-input" placeholder="IP Android TV (ej: 192.168.1.150)" autocomplete="off" />
+          <button id="btn-save-ip" class="ip-save-btn">Conectar</button>
+        </div>
+      </div>
+
+      <!-- CUERPO DESPLEGABLE: BÚSQUEDA + D-PAD -->
+      <div id="body-panel" class="collapsible">
+        <div class="body-inner">
+          <!-- Barra de búsqueda cápsula -->
+          <div class="search-form">
+            <button id="btn-search" class="icon-btn" title="Enviar búsqueda (Enter)">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+            </button>
+            <input id="search-input" type="text" class="search-input" placeholder="Buscar video o pegar enlace..." autocomplete="off" />
+            <button id="btn-clear" class="icon-btn hidden" title="Borrar texto">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
+          </div>
+
+          <!-- Barra D-Pad -->
+          <div id="nav-panel" class="collapsible">
+            <div class="nav-capsule">
+              <button class="nav-btn" data-key="4" title="Atrás (Backspace)">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="9 14 4 9 9 4"></polyline>
+                  <path d="M20 20v-7a4 4 0 0 0-4-4H4"></path>
+                </svg>
+              </button>
+              <button class="nav-btn" data-key="21" title="Izquierda (←)">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="15 18 9 12 15 6"></polyline>
+                </svg>
+              </button>
+              <button class="nav-btn" data-key="19" title="Arriba (↑)">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="18 15 12 9 6 15"></polyline>
+                </svg>
+              </button>
+              <button class="nav-btn nav-btn-play" data-key="23" title="Seleccionar / Reproducir (Enter)">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+                  <polygon points="6 4 20 12 6 20 6 4"></polygon>
+                </svg>
+              </button>
+              <button class="nav-btn" data-key="20" title="Abajo (↓)">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+              </button>
+              <button class="nav-btn" data-key="22" title="Derecha (→)">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
