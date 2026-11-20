@@ -26,7 +26,8 @@ jobs:
           workspaces: "windows/src-tauri -> target"
 
       - name: Install Tauri CLI v2
-        uses: taiki-e/install-action@cargo-tauri
+        shell: pwsh
+        run: npm install -g @tauri-apps/cli@2
 
       - name: Download official Google ADB for Windows
         shell: pwsh
@@ -41,7 +42,8 @@ jobs:
 
       - name: Build Tauri application (Windows x64)
         working-directory: windows/src-tauri
-        run: cargo tauri build
+        shell: pwsh
+        run: tauri build
 
       - name: Package Portable ZIP (EXE + ADB)
         shell: pwsh
