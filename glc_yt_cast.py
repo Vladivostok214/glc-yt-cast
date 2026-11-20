@@ -32,8 +32,16 @@ import gi
 gi.require_version('Gtk', '3.0')
 gi.require_version('Gdk', '3.0')
 gi.require_version('GdkPixbuf', '2.0')
-gi.require_version('AyatanaAppIndicator3', '0.1')
-from gi.repository import Gtk, Gdk, GLib, GdkPixbuf, AyatanaAppIndicator3
+from gi.repository import Gtk, Gdk, GLib, GdkPixbuf
+
+AppIndicator = None
+for _ind_ns in ('AyatanaAppIndicator3', 'AppIndicator3'):
+    try:
+        gi.require_version(_ind_ns, '0.1')
+        AppIndicator = getattr(__import__('gi.repository', fromlist=[_ind_ns]), _ind_ns)
+        break
+    except (ValueError, ImportError):
+        continue
 
 BASE_DIR = Path(__file__).resolve().parent
 ASSETS_DIR = BASE_DIR / "assets"
@@ -721,7 +729,8 @@ class FloatingSearchWindow(Gtk.Window):
         dialog = Gtk.Dialog(
             title="Configurar IP de la TV",
             transient_for=self,
-            flags=Gtk.DialogFlags.MODAL | Gtk.DialogFlags.DESTROY_WITH_PARENT
+            modal=True,
+            destroy_with_parent=True
         )
         dialog.add_buttons(
             "Cancelar", Gtk.ResponseType.CANCEL,
@@ -895,17 +904,31 @@ class TrayApp:
         self.apply_css()
 
         self.window = FloatingSearchWindow(self.caster, self.quit_app)
+        self.indicator = None
 
-        # Indicador en la barra superior de Ubuntu
-        self.indicator = AyatanaAppIndicator3.Indicator.new(
-            "glc-yt-cast",
-            ICON_PATH,
-            AyatanaAppIndicator3.IndicatorCategory.APPLICATION_STATUS
-        )
-        self.indicator.set_status(AyatanaAppIndicator3.IndicatorStatus.ACTIVE)
+        # Indicador en la bandeja del sistema (con fallback si no está disponible)
+        if AppIndicator is not None:
+            try:
+                self.indicator = AppIndicator.Indicator.new(
+                    "glc-yt-cast",
+                    ICON_PATH,
+                    AppIndicator.IndicatorCategory.APPLICATION_STATUS
+                )
+                self.indicator.set_status(AppIndicator.IndicatorStatus.ACTIVE)
+                self.setup_menu()
+            except Exception:
+                self.indicator = None
 
-        self.setup_menu()
+        if self.indicator is None:
+            # Sin bandeja del sistema: cerrar la ventana sale de la app limpiamente
+            self.window.set_skip_taskbar_hint(False)
+            self.window.hide_window = self._quit_and_return_true
+
         self.window.show_window()
+
+    def _quit_and_return_true(self):
+        self.quit_app()
+        return True
 
     def apply_css(self):
         provider = Gtk.CssProvider()
@@ -914,6 +937,8 @@ class TrayApp:
         Gtk.StyleContext.add_provider_for_screen(screen, provider, Gtk.STYLE_PROVIDER_PRIORITY_USER)
 
     def setup_menu(self):
+        if self.indicator is None:
+            return
         menu = Gtk.Menu()
 
         item_search = Gtk.MenuItem(label="🔍 Buscar en YouTube TV")
@@ -934,10 +959,11 @@ class TrayApp:
         self.indicator.set_menu(menu)
 
     def quit_app(self):
-        try:
-            self.indicator.set_status(AyatanaAppIndicator3.IndicatorStatus.PASSIVE)
-        except Exception:
-            pass
+        if self.indicator is not None and AppIndicator is not None:
+            try:
+                self.indicator.set_status(AppIndicator.IndicatorStatus.PASSIVE)
+            except Exception:
+                pass
         self.caster.disconnect()
         Gtk.main_quit()
 

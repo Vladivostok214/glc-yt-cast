@@ -21,13 +21,8 @@ if ! command -v distrobox >/dev/null 2>&1; then
     exit 1
 fi
 
-echo "==> Creando/iniciando contenedor de prueba Fedora..."
-distrobox create --image fedora:latest --name "${CONTAINER_NAME}" --yes || true
+echo "==> Creando/iniciando contenedor limpio de Fedora (sin instalar dependencias)..."
+distrobox create --image docker.io/library/fedora:latest --name "${CONTAINER_NAME}" --yes || true
 
-echo "==> Asegurando dependencias de entorno de escritorio en Fedora..."
-distrobox enter "${CONTAINER_NAME}" -- bash -c "
-    sudo dnf install -y gtk3 python3-gobject libayatana-appindicator-gtk3
-"
-
-echo "==> [OK] Lanzando AppImage dentro de Fedora..."
-distrobox enter "${CONTAINER_NAME}" -- "${APPIMAGE}"
+echo "==> [OK] Lanzando AppImage autocontenida dentro de Fedora limpio..."
+distrobox enter "${CONTAINER_NAME}" -- env APPIMAGE_EXTRACT_AND_RUN=1 "${APPIMAGE}"
